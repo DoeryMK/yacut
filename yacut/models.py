@@ -1,6 +1,6 @@
+import random
 import re
 import string
-import random
 from datetime import datetime
 
 from flask import url_for

@@ -1,9 +1,9 @@
-from flask import request, jsonify
+from flask import jsonify, request
 
 from yacut import app, db
 from yacut.error_handlers import InvalidAPIUsage
-from yacut.models import URLMap, short_id_is_valid, short_id_is_exist, \
-    get_unique_short_id
+from yacut.models import (URLMap, get_unique_short_id, short_id_is_exist,
+                          short_id_is_valid)
 
 CONTENT_TYPE = 'application/json'
 

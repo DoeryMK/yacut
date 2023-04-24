@@ -1,8 +1,9 @@
-from flask import render_template, flash, redirect, url_for, abort
+from flask import abort, flash, redirect, render_template, url_for
 
 from yacut import app, db
 from yacut.forms import URLForm
-from yacut.models import URLMap, get_unique_short_id, short_id_is_exist, short_id_is_valid
+from yacut.models import (URLMap, get_unique_short_id, short_id_is_exist,
+                          short_id_is_valid)
 
 
 @app.route('/', methods=['GET', 'POST'])
