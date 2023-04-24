@@ -8,6 +8,7 @@ from yacut.models import (URLMap, get_unique_short_id, short_id_is_exist,
 
 SHORT_ID_IS_EXIST = 'Имя {short_id} уже занято!'
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     """View-функция для главной страницы."""
