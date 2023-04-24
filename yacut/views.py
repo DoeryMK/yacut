@@ -1,16 +1,16 @@
 from flask import abort, flash, redirect, render_template
 
 from yacut import app, db
+from yacut.error_handlers import INVALID_SHORT_ID
 from yacut.forms import URLForm
 from yacut.models import (URLMap, get_unique_short_id, short_id_is_exist,
                           short_id_is_valid)
 
+SHORT_ID_IS_EXIST = 'Имя {short_id} уже занято!'
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
-    """
-    Опишите view-функцию для главной страницы
-    """
+    """View-функция для главной страницы."""
     form = URLForm()
     if not form.validate_on_submit():
         return render_template('index.html', form=form, url=None)
@@ -19,10 +19,10 @@ def index_view():
         short_id = get_unique_short_id()
     else:
         if not short_id_is_valid(short_id):
-            flash('Указано недопустимое имя для короткой ссылки')
+            flash(INVALID_SHORT_ID)
             return render_template('index.html', form=form, url=None)
         if short_id_is_exist(short_id):
-            flash(f'Имя {short_id} уже занято!')
+            flash(SHORT_ID_IS_EXIST.format(short_id=short_id))
             return render_template('index.html', form=form, url=None)
     url = URLMap(
         original=form.original_link.data,
@@ -35,9 +35,7 @@ def index_view():
 
 @app.route('/<string:short>', methods=['GET'])
 def short_url_view(short):
-    '''
-    Опишите view-функцию, которая будет отвечать за переадресацию
-    '''
+    """View-функция отвечающая за переадресацию."""
     url = URLMap.query.filter_by(short=short).first()
     if url is None:
         abort(404)

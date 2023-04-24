@@ -7,11 +7,13 @@ from flask import url_for
 
 from yacut import db
 
-SIMBOLS = string.ascii_letters + string.digits
+MAX_SHORT_ID_LENGTH = 16
 PATTERN = r'[a-zA-Z0-9]'
+SIMBOLS = string.ascii_letters + string.digits
 
 
 class URLMap(db.Model):
+    """Модель для связи оригинальной ссылки и короткого идентификатора."""
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(256), nullable=False)
     short = db.Column(db.String(128), unique=True, nullable=False)
@@ -21,7 +23,9 @@ class URLMap(db.Model):
         return dict(
             url=self.original,
             short_link=url_for(
-                'short_url_view', short=self.short, _external=True
+                'short_url_view',
+                short=self.short,
+                _external=True
             )
         )
 
@@ -31,10 +35,12 @@ class URLMap(db.Model):
 
 
 def short_id_is_valid(short_id):
-    if len(short_id) > 16:
+    if len(short_id) > MAX_SHORT_ID_LENGTH:
         return False
-    checked_id = [letter for letter in short_id if re.match(PATTERN, letter)]
-    if len(short_id) != len(checked_id):
+    checked_short_id = [
+        letter for letter in short_id if re.match(PATTERN, letter)
+    ]
+    if len(short_id) != len(checked_short_id):
         return False
     return True
 
