@@ -1,4 +1,11 @@
 import os
+import string
+
+ALLOWED_SIMBOLS = string.ascii_letters + string.digits
+AUTO_SHORT_ID_LENGTH = 6
+MAX_SHORT_ID_LENGTH = 16
+MAX_ORIGINAL_LINK_LENGTH = 2048
+SHORT_URL_VIEW = 'short_url_view'
 
 
 class Config(object):

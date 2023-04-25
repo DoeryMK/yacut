@@ -1,29 +1,44 @@
 import random
 import re
-import string
+# import string
 from datetime import datetime
 
 from flask import url_for
 
+from settings import (ALLOWED_SIMBOLS, AUTO_SHORT_ID_LENGTH,
+                      MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH,
+                      SHORT_URL_VIEW)
 from yacut import db
 
-MAX_SHORT_ID_LENGTH = 16
 PATTERN = r'[a-zA-Z0-9]'
-SIMBOLS = string.ascii_letters + string.digits
 
 
 class URLMap(db.Model):
     """Модель для связи оригинальной ссылки и короткого идентификатора."""
-    id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(256), nullable=False)
-    short = db.Column(db.String(128), unique=True, nullable=False)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    original = db.Column(
+        db.String(MAX_ORIGINAL_LINK_LENGTH),
+        nullable=False
+    )
+    short = db.Column(
+        db.String(MAX_SHORT_ID_LENGTH),
+        unique=True,
+        nullable=False
+    )
+    timestamp = db.Column(
+        db.DateTime,
+        index=True,
+        default=datetime.utcnow
+    )
 
     def to_dict(self):
         return dict(
             url=self.original,
             short_link=url_for(
-                'short_url_view',
+                SHORT_URL_VIEW,
                 short=self.short,
                 _external=True
             )
@@ -50,5 +65,5 @@ def short_id_is_exist(short_id):
 
 
 def get_unique_short_id():
-    short_id = ''.join(random.choices(SIMBOLS, k=6))
+    short_id = ''.join(random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
     return get_unique_short_id() if short_id_is_exist(short_id) else short_id
