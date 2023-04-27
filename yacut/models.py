@@ -1,6 +1,5 @@
 import random
 import re
-# import string
 from datetime import datetime
 
 from flask import url_for
@@ -46,53 +45,51 @@ class URLMap(db.Model):
             )
         )
 
-    def from_dict(self, data, short_id):
-        self.original = data['url']
-        self.short = short_id
+    @staticmethod
+    def create(original, short):
+        urlmap = URLMap(
+            original=original,
+            short=short,
+        )
+        db.session.add(urlmap)
+        db.session.commit()
+        return urlmap
 
+    @staticmethod
+    def get_original_url(short):
+        urlmap = URLMap.query.filter_by(short=short).first()
+        return urlmap.original if urlmap is not None else None
 
-# def short_id_is_valid(short_id):
-#     if len(short_id) > MAX_SHORT_ID_LENGTH:
-#         return False
-#     checked_short_id = [
-#         letter for letter in short_id if re.match(ALLOWED_SIMBOLS, letter)
-#     ]
-#     if len(short_id) != len(checked_short_id):
-#         return False
-#     if not re_function(short_id):
-#         return False
-#     return True
+    @staticmethod
+    def short_id_is_valid(short_id):
+        """
+        Как-то обрабатывать ошибки
+        """
+        if len(short_id) > MAX_SHORT_ID_LENGTH:
+            # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
+            return False
+        if re.fullmatch(
+                pattern=SHORT_ID_PATTERN, string=short_id, flags=re.ASCII
+        ) is None:
+            # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
+            return False
+        return short_id
 
+    @staticmethod
+    def short_id_is_exist(short_id):
+        return URLMap.query.filter_by(short=short_id).first() is not None
 
-def short_id_is_valid(short_id):
-    """
-    Как-то обрабатывать ошибки
-    """
-    if len(short_id) > MAX_SHORT_ID_LENGTH:
-        # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
-        return False
-    if re.fullmatch(
-            pattern=SHORT_ID_PATTERN, string=short_id, flags=re.ASCII
-    ) is None:
-        # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
-        return False
-    return short_id
-
-
-def short_id_is_exist(short_id):
-    return URLMap.query.filter_by(short=short_id).first() is not None
-
-
-def get_unique_short_id():
-    """
-    Как-то обрабатывать ошибки
-    """
-    counter = 1
-    while True:
-        short_id = ''.join(
-            random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
-        if not short_id_is_exist(short_id):
-            return short_id
-        counter += 1
-        if counter >= MAX_GET_AUTO_ATTEMPT_NUMBER:
-            raise FailedShortIdAutoGeneration(FAILED_AUTO_GENERATION)
+    @staticmethod
+    def get_unique_short_id():
+        """
+        Как-то обрабатывать ошибки
+        """
+        counter = 1
+        while True:
+            short_id = ''.join(
+                random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
+            if not URLMap.short_id_is_exist(short_id):
+                return short_id
+            counter += 1
+            if counter >= MAX_GET_AUTO_ATTEMPT_NUMBER:
+                raise FailedShortIdAutoGeneration(FAILED_AUTO_GENERATION)

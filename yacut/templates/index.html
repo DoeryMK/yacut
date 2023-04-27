@@ -42,10 +42,10 @@
           <div class="col-sm"></div>
           <div class="col-sm">
             <p class="text-center">
-             {% if url.short != Null %}
+             {% if short_id %}
                <h5 class="text-center">Ваша короткая ссылка:
-                 <a href="{{ url_for('short_url_view', short=url.short, _external=True) }}">
-                   {{ url_for('short_url_view', short=url.short, _external=True) }}
+                 <a href="{{ short_id }}">
+                   {{ short_id }}
                  </a>
                </h5>
              {% endif %}
