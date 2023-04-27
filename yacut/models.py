@@ -7,10 +7,12 @@ from flask import url_for
 
 from settings import (ALLOWED_SIMBOLS, AUTO_SHORT_ID_LENGTH,
                       MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH,
-                      SHORT_URL_VIEW)
+                      SHORT_URL_VIEW, MAX_GET_AUTO_ATTEMPT_NUMBER,
+                      SHORT_ID_PATTERN)
 from yacut import db
 
-PATTERN = r'[a-zA-Z0-9]'
+from yacut.error_handlers import FailedShortIdAutoGeneration, \
+    FAILED_AUTO_GENERATION, FAILED_SHORT_ID_VALIDATION, FailedShortIdValidation
 
 
 class URLMap(db.Model):
@@ -49,15 +51,32 @@ class URLMap(db.Model):
         self.short = short_id
 
 
+# def short_id_is_valid(short_id):
+#     if len(short_id) > MAX_SHORT_ID_LENGTH:
+#         return False
+#     checked_short_id = [
+#         letter for letter in short_id if re.match(ALLOWED_SIMBOLS, letter)
+#     ]
+#     if len(short_id) != len(checked_short_id):
+#         return False
+#     if not re_function(short_id):
+#         return False
+#     return True
+
+
 def short_id_is_valid(short_id):
+    """
+    Как-то обрабатывать ошибки
+    """
     if len(short_id) > MAX_SHORT_ID_LENGTH:
+        # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
         return False
-    checked_short_id = [
-        letter for letter in short_id if re.match(PATTERN, letter)
-    ]
-    if len(short_id) != len(checked_short_id):
+    if re.fullmatch(
+            SHORT_ID_PATTERN, short_id, flags=re.ASCII
+    ) is None:
+        # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
         return False
-    return True
+    return short_id
 
 
 def short_id_is_exist(short_id):
@@ -65,5 +84,15 @@ def short_id_is_exist(short_id):
 
 
 def get_unique_short_id():
-    short_id = ''.join(random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
-    return get_unique_short_id() if short_id_is_exist(short_id) else short_id
+    """
+    Как-то обрабатывать ошибки
+    """
+    counter = 1
+    while True:
+        short_id = ''.join(
+            random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
+        if not short_id_is_exist(short_id):
+            return short_id
+        counter += 1
+        if counter >= MAX_GET_AUTO_ATTEMPT_NUMBER:
+            raise FailedShortIdAutoGeneration(FAILED_AUTO_GENERATION)

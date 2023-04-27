@@ -5,7 +5,9 @@ ALLOWED_SIMBOLS = string.ascii_letters + string.digits
 AUTO_SHORT_ID_LENGTH = 6
 MAX_SHORT_ID_LENGTH = 16
 MAX_ORIGINAL_LINK_LENGTH = 2048
+MAX_GET_AUTO_ATTEMPT_NUMBER = 0
 SHORT_URL_VIEW = 'short_url_view'
+SHORT_ID_PATTERN = r'[^\W_]+'
 
 
 class Config(object):
