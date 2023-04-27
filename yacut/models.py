@@ -72,7 +72,7 @@ def short_id_is_valid(short_id):
         # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
         return False
     if re.fullmatch(
-            SHORT_ID_PATTERN, short_id, flags=re.ASCII
+            pattern=SHORT_ID_PATTERN, string=short_id, flags=re.ASCII
     ) is None:
         # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
         return False
