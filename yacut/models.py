@@ -9,9 +9,9 @@ from settings import (ALLOWED_SIMBOLS, AUTO_SHORT_ID_LENGTH,
                       MAX_SHORT_ID_LENGTH, SHORT_ID_PATTERN, SHORT_URL_VIEW)
 from yacut import db
 from yacut.error_handlers import (FAILED_AUTO_GENERATION,
-                                  FAILED_SHORT_ID_VALIDATION,
                                   FailedShortIdAutoGeneration,
-                                  FailedShortIdValidation)
+                                  FailedShortIdValidation, ShortIdIsNotFound,
+                                  ShortIdIsNotUnique)
 
 
 class URLMap(db.Model):
@@ -47,6 +47,12 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short):
+        if short == '' or short is None:
+            short = URLMap.get_unique_short_id()
+        else:
+            short = URLMap.short_id_is_valid(short)
+            if URLMap.short_id_is_exist(short):
+                raise ShortIdIsNotUnique
         urlmap = URLMap(
             original=original,
             short=short,
@@ -58,38 +64,38 @@ class URLMap(db.Model):
     @staticmethod
     def get_original_url(short):
         urlmap = URLMap.query.filter_by(short=short).first()
-        return urlmap.original if urlmap is not None else None
+        if urlmap is None:
+            raise ShortIdIsNotFound
+        return urlmap.original
 
     @staticmethod
-    def short_id_is_valid(short_id):
-        """
-        Как-то обрабатывать ошибки
-        """
-        if len(short_id) > MAX_SHORT_ID_LENGTH:
-            # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
-            return False
+    def short_id_is_valid(short):
+        if len(short) > MAX_SHORT_ID_LENGTH:
+            raise FailedShortIdValidation
         if re.fullmatch(
-                pattern=SHORT_ID_PATTERN, string=short_id, flags=re.ASCII
+                pattern=SHORT_ID_PATTERN,
+                string=short,
+                flags=re.ASCII
         ) is None:
-            # raise FailedShortIdValidation(FAILED_SHORT_ID_VALIDATION)
-            return False
-        return short_id
+            raise FailedShortIdValidation
+        return short
 
     @staticmethod
-    def short_id_is_exist(short_id):
-        return URLMap.query.filter_by(short=short_id).first() is not None
+    def short_id_is_exist(short):
+        return URLMap.query.filter_by(short=short).first() is not None
 
     @staticmethod
     def get_unique_short_id():
-        """
-        Как-то обрабатывать ошибки
-        """
         counter = 1
         while True:
-            short_id = ''.join(
-                random.choices(ALLOWED_SIMBOLS, k=AUTO_SHORT_ID_LENGTH))
+            short_id = ''.join(random.choices(
+                ALLOWED_SIMBOLS,
+                k=AUTO_SHORT_ID_LENGTH
+            ))
             if not URLMap.short_id_is_exist(short_id):
                 return short_id
             counter += 1
             if counter >= MAX_GET_AUTO_ATTEMPT_NUMBER:
-                raise FailedShortIdAutoGeneration(FAILED_AUTO_GENERATION)
+                raise FailedShortIdAutoGeneration(
+                    FAILED_AUTO_GENERATION
+                )

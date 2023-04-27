@@ -3,11 +3,30 @@ from flask import jsonify, render_template
 from yacut import app, db
 
 INVALID_SHORT_ID = 'Указано недопустимое имя для короткой ссылки'
+FAILED_AUTO_GENERATION = "Ошибка автоматической генерации short_id"
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
 SHORT_ID_NOT_FOUND = 'Указанный id не найден'
 URL_IS_REQUIRED = '\"url\" является обязательным полем!'
-FAILED_AUTO_GENERATION = "Ошибка автоматической генерации short_id"
-FAILED_SHORT_ID_VALIDATION = "Ошибка валидации: введен недопустимый short_id."
+
+
+class FailedShortIdAutoGeneration(Exception):
+    """Ошибка автоматической генерации short_id."""
+    pass
+
+
+class FailedShortIdValidation(Exception):
+    """Ошибка валидации: недопустимый short_id."""
+    pass
+
+
+class ShortIdIsNotUnique(Exception):
+    """Ошибка проверки на уникальность: short_id существует."""
+    pass
+
+
+class ShortIdIsNotFound(Exception):
+    """Указанный short_id не найден."""
+    pass
 
 
 class InvalidAPIUsage(Exception):
@@ -21,16 +40,6 @@ class InvalidAPIUsage(Exception):
 
     def to_dict(self):
         return dict(message=self.message)
-
-
-class FailedShortIdAutoGeneration(Exception):
-    """Ошибка автоматической генерации short_id."""
-    pass
-
-
-class FailedShortIdValidation(Exception):
-    """Ошибка валидации: недопустимый short_id."""
-    pass
 
 
 @app.errorhandler(InvalidAPIUsage)
