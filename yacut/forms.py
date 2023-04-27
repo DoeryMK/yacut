@@ -2,10 +2,11 @@ import re
 
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, URLField
-from wtforms.validators import Length, Optional, Regexp, ValidationError
+from wtforms.validators import (InputRequired, Length, Optional, Regexp,
+                                ValidationError)
 
-from settings import MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH, \
-    SHORT_ID_PATTERN
+from settings import (MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH,
+                      SHORT_ID_PATTERN)
 from yacut.error_handlers import INVALID_SHORT_ID
 from yacut.models import short_id_is_exist
 
@@ -13,6 +14,7 @@ ORIGINAL_LINK_COMMENT = 'Добавьте исходную ссылку'
 CUSTOM_ID_COMMENT = 'Добавьте свой вариант короткой ссылки'
 SUBMIT_COMMENT = 'Создать'
 SHORT_ID_IS_EXIST = 'Имя {short_id} уже занято!'
+URL_IS_REQUIRED = 'Необходимо ввести исходную ссылку'
 
 
 class URLForm(FlaskForm):
@@ -21,6 +23,9 @@ class URLForm(FlaskForm):
         validators=[
             Length(
                 max=MAX_ORIGINAL_LINK_LENGTH
+            ),
+            InputRequired(
+                message=URL_IS_REQUIRED
             )
         ]
     )

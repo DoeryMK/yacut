@@ -6,13 +6,13 @@ from datetime import datetime
 from flask import url_for
 
 from settings import (ALLOWED_SIMBOLS, AUTO_SHORT_ID_LENGTH,
-                      MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH,
-                      SHORT_URL_VIEW, MAX_GET_AUTO_ATTEMPT_NUMBER,
-                      SHORT_ID_PATTERN)
+                      MAX_GET_AUTO_ATTEMPT_NUMBER, MAX_ORIGINAL_LINK_LENGTH,
+                      MAX_SHORT_ID_LENGTH, SHORT_ID_PATTERN, SHORT_URL_VIEW)
 from yacut import db
-
-from yacut.error_handlers import FailedShortIdAutoGeneration, \
-    FAILED_AUTO_GENERATION, FAILED_SHORT_ID_VALIDATION, FailedShortIdValidation
+from yacut.error_handlers import (FAILED_AUTO_GENERATION,
+                                  FAILED_SHORT_ID_VALIDATION,
+                                  FailedShortIdAutoGeneration,
+                                  FailedShortIdValidation)
 
 
 class URLMap(db.Model):
