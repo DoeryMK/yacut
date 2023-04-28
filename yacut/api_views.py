@@ -1,10 +1,11 @@
 from flask import jsonify, request
 
 from yacut import app
-from yacut.error_handlers import (INVALID_SHORT, NO_REQUEST_BODY,
-                                  SHORT_NOT_FOUND, URL_IS_REQUIRED,
-                                  FailedShortValidation, InvalidAPIUsage,
-                                  ShortIsNotFound, ShortIsNotUnique)
+from yacut.error_handlers import (
+    INVALID_SHORT, NO_REQUEST_BODY, SHORT_NOT_FOUND,
+    URL_IS_REQUIRED, FailedShortValidation, InvalidAPIUsage,
+    ShortIsNotFound, ShortIsNotUnique
+)
 from yacut.models import URLMap
 
 SHORT_IS_EXIST = 'Имя "{short}" уже занято.'
@@ -18,7 +19,7 @@ def add_short_url():
         raise InvalidAPIUsage(NO_REQUEST_BODY)
     if 'url' not in data:
         raise InvalidAPIUsage(URL_IS_REQUIRED)
-    short = data.get('custom_id') if 'custom_id' in data else None
+    short = data.get('custom_id')
     try:
         urlmap = URLMap.create(
             original=data['url'],
