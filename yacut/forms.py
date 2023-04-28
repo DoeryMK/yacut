@@ -5,14 +5,14 @@ from wtforms import SubmitField, URLField
 from wtforms.validators import (InputRequired, Length, Optional, Regexp,
                                 ValidationError)
 
-from settings import (MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_ID_LENGTH,
-                      SHORT_ID_PATTERN)
-from yacut.error_handlers import INVALID_SHORT_ID
+from settings import (MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_LENGTH,
+                      SHORT_PATTERN)
+from yacut.error_handlers import INVALID_SHORT
 from yacut.models import URLMap
 
 ORIGINAL_LINK_COMMENT = 'Добавьте исходную ссылку'
 CUSTOM_ID_COMMENT = 'Добавьте свой вариант короткой ссылки'
-SHORT_ID_IS_EXIST = 'Имя {short_id} уже занято!'
+SHORT_IS_EXIST = 'Имя {short} уже занято!'
 SUBMIT_COMMENT = 'Создать'
 URL_IS_REQUIRED = 'Необходимо ввести исходную ссылку'
 
@@ -33,14 +33,14 @@ class URLForm(FlaskForm):
         CUSTOM_ID_COMMENT,
         validators=[
             Length(
-                max=MAX_SHORT_ID_LENGTH,
-                message=INVALID_SHORT_ID
+                max=MAX_SHORT_LENGTH,
+                message=INVALID_SHORT
             ),
             Optional(),
             Regexp(
-                regex=SHORT_ID_PATTERN,
+                regex=SHORT_PATTERN,
                 flags=re.ASCII,
-                message=INVALID_SHORT_ID
+                message=INVALID_SHORT
             )
         ]
     )
@@ -49,7 +49,7 @@ class URLForm(FlaskForm):
     )
 
     def validate_custom_id(flaskform, field):
-        if URLMap.short_id_is_exist(field.data):
+        if URLMap.short_is_exist(field.data):
             raise ValidationError(
-                SHORT_ID_IS_EXIST.format(short_id=field.data)
+                SHORT_IS_EXIST.format(short=field.data)
             )

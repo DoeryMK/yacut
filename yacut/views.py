@@ -1,13 +1,12 @@
-from flask import abort, flash, redirect, render_template, url_for
+from flask import abort, flash, redirect, render_template
 
-from settings import SHORT_URL_VIEW
 from yacut import app
-from yacut.error_handlers import (INVALID_SHORT_ID, FailedShortIdValidation,
-                                  ShortIdIsNotFound, ShortIdIsNotUnique)
+from yacut.error_handlers import (INVALID_SHORT, FailedShortValidation,
+                                  ShortIsNotFound, ShortIsNotUnique)
 from yacut.forms import URLForm
 from yacut.models import URLMap
 
-SHORT_ID_IS_EXIST = 'Имя {short_id} уже занято!'
+SHORT_IS_EXIST = 'Имя {short} уже занято!'
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -15,31 +14,30 @@ def index_view():
     """View-функция для главной страницы."""
     form = URLForm()
     if not form.validate_on_submit():
-        return render_template('index.html', form=form)
-    short_id = form.custom_id.data
+        return render_template(
+            'index.html', form=form
+        )
+    short = form.custom_id.data
     try:
         urlmap = URLMap.create(
             original=form.original_link.data,
-            short=short_id,
-        )
-        short_id = url_for(
-            SHORT_URL_VIEW,
-            short=urlmap.short,
-            _external=True
+            short=short,
         )
         return render_template(
-            'index.html', form=form, short_id=short_id
+            'index.html',
+            form=form,
+            short_link=urlmap.get_absolute_short_url()
         )
-    except FailedShortIdValidation:
+    except FailedShortValidation:
         flash(
-            INVALID_SHORT_ID
+            INVALID_SHORT
         )
         return render_template(
             'index.html', form=form
         )
-    except ShortIdIsNotUnique:
+    except ShortIsNotUnique:
         flash(
-            SHORT_ID_IS_EXIST.format(short_id=short_id)
+            SHORT_IS_EXIST.format(short=short)
         )
         return render_template(
             'index.html', form=form
@@ -53,5 +51,5 @@ def short_url_view(short):
         return redirect(
             URLMap.get_original_url(short), code=302
         )
-    except ShortIdIsNotFound:
+    except ShortIsNotFound:
         abort(404)

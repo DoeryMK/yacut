@@ -1,13 +1,13 @@
 from flask import jsonify, request
 
 from yacut import app
-from yacut.error_handlers import (INVALID_SHORT_ID, NO_REQUEST_BODY,
-                                  SHORT_ID_NOT_FOUND, URL_IS_REQUIRED,
-                                  FailedShortIdValidation, InvalidAPIUsage,
-                                  ShortIdIsNotFound, ShortIdIsNotUnique)
+from yacut.error_handlers import (INVALID_SHORT, NO_REQUEST_BODY,
+                                  SHORT_NOT_FOUND, URL_IS_REQUIRED,
+                                  FailedShortValidation, InvalidAPIUsage,
+                                  ShortIsNotFound, ShortIsNotUnique)
 from yacut.models import URLMap
 
-SHORT_ID_IS_EXIST = 'Имя "{short_id}" уже занято.'
+SHORT_IS_EXIST = 'Имя "{short}" уже занято.'
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -18,20 +18,20 @@ def add_short_url():
         raise InvalidAPIUsage(NO_REQUEST_BODY)
     if 'url' not in data:
         raise InvalidAPIUsage(URL_IS_REQUIRED)
-    short_id = data.get('custom_id') if 'custom_id' in data else None
+    short = data.get('custom_id') if 'custom_id' in data else None
     try:
         urlmap = URLMap.create(
             original=data['url'],
-            short=short_id,
+            short=short,
         )
         return jsonify(urlmap.to_dict()), 201
-    except FailedShortIdValidation:
+    except FailedShortValidation:
         raise InvalidAPIUsage(
-            INVALID_SHORT_ID
+            INVALID_SHORT
         )
-    except ShortIdIsNotUnique:
+    except ShortIsNotUnique:
         raise InvalidAPIUsage(
-            SHORT_ID_IS_EXIST.format(short_id=short_id)
+            SHORT_IS_EXIST.format(short=short)
         )
 
 
@@ -40,7 +40,7 @@ def get_original_url(short):
     """Обработка запроса на получение оригинальной ссылки."""
     try:
         return jsonify({'url': URLMap.get_original_url(short)}), 200
-    except ShortIdIsNotFound:
+    except ShortIsNotFound:
         raise InvalidAPIUsage(
-            SHORT_ID_NOT_FOUND, 404
+            SHORT_NOT_FOUND, 404
         )

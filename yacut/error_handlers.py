@@ -2,30 +2,30 @@ from flask import jsonify, render_template
 
 from yacut import app, db
 
-INVALID_SHORT_ID = 'Указано недопустимое имя для короткой ссылки'
-FAILED_AUTO_GENERATION = "Ошибка автоматической генерации short_id"
+INVALID_SHORT = 'Указано недопустимое имя для короткой ссылки'
+FAILED_AUTO_GENERATION = "Ошибка автоматической генерации идентификатора"
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
-SHORT_ID_NOT_FOUND = 'Указанный id не найден'
+SHORT_NOT_FOUND = 'Указанный id не найден'
 URL_IS_REQUIRED = '\"url\" является обязательным полем!'
 
 
-class FailedShortIdAutoGeneration(Exception):
-    """Ошибка автоматической генерации short_id."""
+class FailedShortAutoGeneration(Exception):
+    """Ошибка автоматической генерации короткого идентификатора."""
     pass
 
 
-class FailedShortIdValidation(Exception):
-    """Ошибка валидации: недопустимый short_id."""
+class FailedShortValidation(Exception):
+    """Ошибка валидации: недопустимый короткий идентификатор."""
     pass
 
 
-class ShortIdIsNotUnique(Exception):
-    """Ошибка проверки на уникальность: short_id существует."""
+class ShortIsNotUnique(Exception):
+    """Ошибка проверки на уникальность: короткий идентификатор существует."""
     pass
 
 
-class ShortIdIsNotFound(Exception):
-    """Указанный short_id не найден."""
+class ShortIsNotFound(Exception):
+    """Указанный короткий идентификатор не найден."""
     pass
 
 

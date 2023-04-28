@@ -42,10 +42,10 @@
           <div class="col-sm"></div>
           <div class="col-sm">
             <p class="text-center">
-             {% if short_id %}
+             {% if short_link %}
                <h5 class="text-center">Ваша короткая ссылка:
-                 <a href="{{ short_id }}">
-                   {{ short_id }}
+                 <a href="{{ short_link }}">
+                   {{ absolute_short_url }}
                  </a>
                </h5>
              {% endif %}
