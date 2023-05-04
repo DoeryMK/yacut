@@ -78,7 +78,6 @@ class URLMap(db.Model):
         if re.fullmatch(
                 pattern=SHORT_PATTERN,
                 string=short,
-                # flags=re.ASCII
         ) is None:
             raise FailedShortValidation
         return short
