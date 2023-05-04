@@ -39,7 +39,7 @@ class URLForm(FlaskForm):
             Optional(),
             Regexp(
                 regex=SHORT_PATTERN,
-                flags=re.ASCII,
+                # flags=re.ASCII,
                 message=INVALID_SHORT
             )
         ]
