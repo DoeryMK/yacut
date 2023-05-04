@@ -5,6 +5,7 @@ from yacut import app, db
 INVALID_SHORT = 'Указано недопустимое имя для короткой ссылки'
 FAILED_AUTO_GENERATION = "Ошибка автоматической генерации идентификатора"
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
+SHORT_IS_EXIST = 'Имя {short} уже занято!'
 SHORT_NOT_FOUND = 'Указанный id не найден'
 URL_IS_REQUIRED = '\"url\" является обязательным полем!'
 

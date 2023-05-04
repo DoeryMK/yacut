@@ -2,13 +2,11 @@ from flask import abort, flash, redirect, render_template
 
 from yacut import app
 from yacut.error_handlers import (
-    INVALID_SHORT, FailedShortValidation, ShortIsNotFound,
-    ShortIsNotUnique
+    INVALID_SHORT, SHORT_IS_EXIST, FailedShortValidation,
+    ShortIsNotFound, ShortIsNotUnique
 )
 from yacut.forms import URLForm
 from yacut.models import URLMap
-
-SHORT_IS_EXIST = 'Имя {short} уже занято!'
 
 
 @app.route('/', methods=['GET', 'POST'])

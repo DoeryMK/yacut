@@ -4,14 +4,17 @@ from datetime import datetime
 
 from flask import url_for
 
-from settings import (ALLOWED_SIMBOLS, AUTO_SHORT_LENGTH,
-                      MAX_GET_AUTO_ATTEMPT_NUMBER, MAX_ORIGINAL_LINK_LENGTH,
-                      MAX_SHORT_LENGTH, SHORT_PATTERN, SHORT_URL_ENDPOINT)
+from settings import (
+    ALLOWED_SIMBOLS, AUTO_SHORT_LENGTH, MAX_GET_AUTO_ATTEMPT_NUMBER,
+    MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_LENGTH, SHORT_PATTERN,
+    SHORT_URL_ENDPOINT
+)
 from yacut import db
-from yacut.error_handlers import (FAILED_AUTO_GENERATION,
-                                  FailedShortAutoGeneration,
-                                  FailedShortValidation, ShortIsNotFound,
-                                  ShortIsNotUnique)
+from yacut.error_handlers import (
+    FAILED_AUTO_GENERATION, INVALID_SHORT, SHORT_IS_EXIST,
+    SHORT_NOT_FOUND, FailedShortAutoGeneration, FailedShortValidation,
+    ShortIsNotFound, ShortIsNotUnique
+)
 
 
 class URLMap(db.Model):
@@ -52,7 +55,9 @@ class URLMap(db.Model):
     def get_original_url(short):
         urlmap = URLMap.query.filter_by(short=short).first()
         if urlmap is None:
-            raise ShortIsNotFound
+            raise ShortIsNotFound(
+                SHORT_NOT_FOUND
+            )
         return urlmap.original
 
     @staticmethod
@@ -62,7 +67,9 @@ class URLMap(db.Model):
         else:
             short = URLMap.short_is_valid(short)
             if URLMap.short_is_exist(short):
-                raise ShortIsNotUnique
+                raise ShortIsNotUnique(
+                    SHORT_IS_EXIST.format(short=short)
+                )
         urlmap = URLMap(
             original=original,
             short=short,
@@ -79,7 +86,9 @@ class URLMap(db.Model):
                 pattern=SHORT_PATTERN,
                 string=short,
         ) is None:
-            raise FailedShortValidation
+            raise FailedShortValidation(
+                INVALID_SHORT
+            )
         return short
 
     @staticmethod
@@ -88,16 +97,15 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_unique_short():
-        counter = 1
-        while True:
+        for attempt in range(MAX_GET_AUTO_ATTEMPT_NUMBER):
+            if attempt >= MAX_GET_AUTO_ATTEMPT_NUMBER:
+                raise FailedShortAutoGeneration(
+                    FAILED_AUTO_GENERATION
+                )
             short = ''.join(random.choices(
                 ALLOWED_SIMBOLS,
                 k=AUTO_SHORT_LENGTH
             ))
             if not URLMap.short_is_exist(short):
                 return short
-            counter += 1
-            if counter >= MAX_GET_AUTO_ATTEMPT_NUMBER:
-                raise FailedShortAutoGeneration(
-                    FAILED_AUTO_GENERATION
-                )
+            attempt += 1
