@@ -13,7 +13,7 @@ from yacut import db
 from yacut.error_handlers import (
     FAILED_AUTO_GENERATION, INVALID_SHORT, SHORT_IS_EXIST,
     SHORT_NOT_FOUND, FailedShortAutoGeneration, FailedShortValidation,
-    ShortIsNotFound, ShortIsNotUnique
+    ShortIsNotFound, ShortIsNotUnique, URL_IS_REQUIRED, UrlIsRequired
 )
 
 
@@ -53,7 +53,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_original_url(short):
-        urlmap = URLMap.query.filter_by(short=short).first()
+        urlmap = URLMap.short_is_exist(short)
         if urlmap is None:
             raise ShortIsNotFound(
                 SHORT_NOT_FOUND
@@ -62,6 +62,8 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short):
+        if original is None:
+            raise UrlIsRequired(URL_IS_REQUIRED)
         if short == '' or short is None:
             short = URLMap.get_unique_short()
         else:
@@ -93,7 +95,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def short_is_exist(short):
-        return URLMap.query.filter_by(short=short).first() is not None
+        return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
     def get_unique_short():

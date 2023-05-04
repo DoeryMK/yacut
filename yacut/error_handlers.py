@@ -30,6 +30,11 @@ class ShortIsNotFound(Exception):
     pass
 
 
+class UrlIsRequired(Exception):
+    """Ошибка валидации: оригинальная ссылка не предоставлена."""
+    pass
+
+
 class InvalidAPIUsage(Exception):
     status_code = 400
 
