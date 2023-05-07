@@ -50,7 +50,7 @@ class URLForm(FlaskForm):
     )
 
     def validate_custom_id(flaskform, field):
-        if URLMap.short_is_exist(field.data):
+        if URLMap.get_short(field.data):
             raise ValidationError(
                 SHORT_IS_EXIST.format(short=field.data)
             )

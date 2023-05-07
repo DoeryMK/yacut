@@ -1,14 +1,17 @@
 from flask import jsonify, request
 
+from settings import MAX_ORIGINAL_LINK_LENGTH
 from yacut import app
 from yacut.error_handlers import (
-    INVALID_SHORT, NO_REQUEST_BODY, SHORT_NOT_FOUND,
-    URL_IS_REQUIRED, FailedShortValidation, InvalidAPIUsage,
-    ShortIsNotFound, ShortIsNotUnique
+    FAILED_AUTO_GENERATION, INVALID_SHORT, NO_REQUEST_BODY,
+    SHORT_NOT_FOUND, URL_IS_REQUIRED, URL_IS_TOO_LONG,
+    FailedOriginalValidation, FailedShortAutoGeneration,
+    FailedShortValidation, InvalidAPIUsage, ShortIsNotFound,
+    ShortIsNotUnique
 )
 from yacut.models import URLMap
 
-SHORT_IS_EXIST = 'Имя "{short}" уже занято.'
+SHORT_NOT_UNIQUE = 'Имя "{short}" уже занято.'
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -24,15 +27,24 @@ def add_short_url():
         urlmap = URLMap.create(
             original=data['url'],
             short=short,
+            validation_required=True,
         )
         return jsonify(urlmap.to_dict()), 201
+    except FailedOriginalValidation:
+        raise InvalidAPIUsage(
+            URL_IS_TOO_LONG.format(length=MAX_ORIGINAL_LINK_LENGTH)
+        )
+    except FailedShortAutoGeneration:
+        raise InvalidAPIUsage(
+            FAILED_AUTO_GENERATION
+        )
     except FailedShortValidation:
         raise InvalidAPIUsage(
             INVALID_SHORT
         )
     except ShortIsNotUnique:
         raise InvalidAPIUsage(
-            SHORT_IS_EXIST.format(short=short)
+            SHORT_NOT_UNIQUE.format(short=short)
         )
 
 

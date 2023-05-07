@@ -6,15 +6,10 @@ ALLOWED_SIMBOLS = string.ascii_letters + string.digits
 AUTO_SHORT_LENGTH = 6
 MAX_SHORT_LENGTH = 16
 MAX_ORIGINAL_LINK_LENGTH = 2048
+
 MAX_GET_AUTO_ATTEMPT_NUMBER = 256
 
-REGEX_SIMBOLS = {
-    'DIGITS': r'\d',
-    'UPPER_LETTERS': r'A-Z',
-    'LOWER_LETTERS': r'a-z',
-}
-PATTERN = '|'.join(f'{value}' for value in REGEX_SIMBOLS.values())
-SHORT_PATTERN = '[' + PATTERN + ']+'
+SHORT_PATTERN = '[' + ALLOWED_SIMBOLS + ']+$'
 
 SHORT_URL_ENDPOINT = 'short_url_view'
 

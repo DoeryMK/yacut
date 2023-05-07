@@ -5,15 +5,17 @@ from datetime import datetime
 from flask import url_for
 
 from settings import (
-    ALLOWED_SIMBOLS, AUTO_SHORT_LENGTH, MAX_GET_AUTO_ATTEMPT_NUMBER,
-    MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_LENGTH, SHORT_PATTERN,
-    SHORT_URL_ENDPOINT
+    ALLOWED_SIMBOLS, AUTO_SHORT_LENGTH,
+    MAX_GET_AUTO_ATTEMPT_NUMBER, MAX_ORIGINAL_LINK_LENGTH,
+    MAX_SHORT_LENGTH, SHORT_PATTERN, SHORT_URL_ENDPOINT
 )
 from yacut import db
 from yacut.error_handlers import (
-    FAILED_AUTO_GENERATION, INVALID_SHORT, SHORT_IS_EXIST,
-    SHORT_NOT_FOUND, FailedShortAutoGeneration, FailedShortValidation,
-    ShortIsNotFound, ShortIsNotUnique, URL_IS_REQUIRED, UrlIsRequired
+    FAILED_AUTO_GENERATION, INVALID_SHORT, SHORT_IS_TOO_LONG,
+    SHORT_NOT_FOUND, SHORT_NOT_UNIQUE, URL_IS_TOO_LONG,
+    FailedOriginalValidation, FailedShortAutoGeneration,
+    FailedShortValidation, ShortIsNotFound,
+    ShortIsNotUnique
 )
 
 
@@ -53,7 +55,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_original_url(short):
-        urlmap = URLMap.short_is_exist(short)
+        urlmap = URLMap.get_short(short)
         if urlmap is None:
             raise ShortIsNotFound(
                 SHORT_NOT_FOUND
@@ -61,18 +63,16 @@ class URLMap(db.Model):
         return urlmap.original
 
     @staticmethod
-    def create(original, short, **kwargs):
-        if original is None:
-            raise UrlIsRequired(URL_IS_REQUIRED)
+    def create(original, short, validation_required):
+        if len(original) > MAX_ORIGINAL_LINK_LENGTH:
+            raise FailedOriginalValidation(
+                URL_IS_TOO_LONG.format(length=MAX_ORIGINAL_LINK_LENGTH)
+            )
         if short == '' or short is None:
             short = URLMap.get_unique_short()
         else:
-            if kwargs.get('form') is None:
+            if validation_required:
                 short = URLMap.short_is_valid(short)
-                if URLMap.short_is_exist(short):
-                    raise ShortIsNotUnique(
-                        SHORT_IS_EXIST.format(short=short)
-                    )
         urlmap = URLMap(
             original=original,
             short=short,
@@ -84,7 +84,9 @@ class URLMap(db.Model):
     @staticmethod
     def short_is_valid(short):
         if len(short) > MAX_SHORT_LENGTH:
-            raise FailedShortValidation
+            raise FailedShortValidation(
+                SHORT_IS_TOO_LONG
+            )
         if re.fullmatch(
             pattern=SHORT_PATTERN,
             string=short,
@@ -92,23 +94,25 @@ class URLMap(db.Model):
             raise FailedShortValidation(
                 INVALID_SHORT
             )
+        if URLMap.get_short(short):
+            raise ShortIsNotUnique(
+                SHORT_NOT_UNIQUE.format(short=short)
+            )
         return short
 
     @staticmethod
-    def short_is_exist(short):
+    def get_short(short):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
     def get_unique_short():
         for attempt in range(MAX_GET_AUTO_ATTEMPT_NUMBER):
-            attempt += 1
-            if attempt >= MAX_GET_AUTO_ATTEMPT_NUMBER:
-                raise FailedShortAutoGeneration(
-                    FAILED_AUTO_GENERATION
-                )
             short = ''.join(random.choices(
                 ALLOWED_SIMBOLS,
                 k=AUTO_SHORT_LENGTH
             ))
-            if not URLMap.short_is_exist(short):
+            if URLMap.get_short(short) is None:
                 return short
+        raise FailedShortAutoGeneration(
+            FAILED_AUTO_GENERATION
+        )

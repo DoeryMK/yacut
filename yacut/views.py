@@ -1,7 +1,10 @@
-from flask import abort, redirect, render_template
+from flask import abort, flash, redirect, render_template
 
 from yacut import app
-from yacut.error_handlers import ShortIsNotFound
+from yacut.error_handlers import (
+    FAILED_AUTO_GENERATION, FailedShortAutoGeneration,
+    ShortIsNotFound
+)
 from yacut.forms import URLForm
 from yacut.models import URLMap
 
@@ -15,15 +18,23 @@ def index_view():
             'index.html', form=form
         )
     short = form.custom_id.data
-    urlmap = URLMap.create(
-        original=form.original_link.data,
-        short=short,
-        form=form,
-    )
+    try:
+        urlmap = URLMap.create(
+            original=form.original_link.data,
+            short=short,
+            validation_required=False,
+        )
+        return render_template(
+            'index.html',
+            form=form,
+            short_link=urlmap.get_absolute_short_url()
+        )
+    except FailedShortAutoGeneration:
+        flash(
+            FAILED_AUTO_GENERATION
+        )
     return render_template(
-        'index.html',
-        form=form,
-        short_link=urlmap.get_absolute_short_url()
+        'index.html', form=form
     )
 
 

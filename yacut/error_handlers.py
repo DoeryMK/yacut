@@ -3,11 +3,19 @@ from flask import jsonify, render_template
 from yacut import app, db
 
 INVALID_SHORT = 'Указано недопустимое имя для короткой ссылки'
-FAILED_AUTO_GENERATION = "Ошибка автоматической генерации идентификатора"
+FAILED_AUTO_GENERATION = 'Ошибка автоматической генерации идентификатора'
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
-SHORT_IS_EXIST = 'Имя {short} уже занято!'
+SHORT_IS_TOO_LONG = (
+    'Размер короткого идентификатора превышен. '
+    'Допустимое количество символов равно {length}.'
+)
 SHORT_NOT_FOUND = 'Указанный id не найден'
+SHORT_NOT_UNIQUE = 'Имя {short} уже занято!'
 URL_IS_REQUIRED = '\"url\" является обязательным полем!'
+URL_IS_TOO_LONG = (
+    'Размер оригинальной ссылки превышен. '
+    'Допустимое количество символов равно {length}.'
+)
 
 
 class FailedShortAutoGeneration(Exception):
@@ -30,8 +38,8 @@ class ShortIsNotFound(Exception):
     pass
 
 
-class UrlIsRequired(Exception):
-    """Ошибка валидации: оригинальная ссылка не предоставлена."""
+class FailedOriginalValidation(Exception):
+    """Ошибка валидации: превышен размер оригинальной ссылки."""
     pass
 
 
