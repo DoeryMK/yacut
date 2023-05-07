@@ -9,9 +9,9 @@ MAX_ORIGINAL_LINK_LENGTH = 2048
 MAX_GET_AUTO_ATTEMPT_NUMBER = 256
 
 REGEX_SIMBOLS = {
-    'DIGITS': '\d+',
-    'UPPER_LETTERS': 'A-Z',
-    'LOWER_LETTERS': 'a-z',
+    'DIGITS': r'\d',
+    'UPPER_LETTERS': r'A-Z',
+    'LOWER_LETTERS': r'a-z',
 }
 PATTERN = '|'.join(f'{value}' for value in REGEX_SIMBOLS.values())
 SHORT_PATTERN = '[' + PATTERN + ']+'
