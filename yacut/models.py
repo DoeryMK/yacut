@@ -101,6 +101,7 @@ class URLMap(db.Model):
     @staticmethod
     def get_unique_short():
         for attempt in range(MAX_GET_AUTO_ATTEMPT_NUMBER):
+            attempt += 1
             if attempt >= MAX_GET_AUTO_ATTEMPT_NUMBER:
                 raise FailedShortAutoGeneration(
                     FAILED_AUTO_GENERATION
@@ -111,4 +112,3 @@ class URLMap(db.Model):
             ))
             if not URLMap.short_is_exist(short):
                 return short
-            attempt += 1
