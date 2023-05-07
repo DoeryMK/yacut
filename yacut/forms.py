@@ -5,7 +5,10 @@ from wtforms.validators import (
     Regexp, ValidationError
 )
 
-from settings import MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_LENGTH, SHORT_PATTERN
+from settings import (
+    MAX_ORIGINAL_LINK_LENGTH, MAX_SHORT_LENGTH,
+    SHORT_PATTERN
+)
 from yacut.error_handlers import INVALID_SHORT
 from yacut.models import URLMap
 

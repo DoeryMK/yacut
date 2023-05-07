@@ -26,13 +26,6 @@
               </p>
               {{ form.submit(class="btn btn-primary") }}
             </form>
-            <p class="text-center my-2">
-              {% with messages = get_flashed_messages() %}
-                {% for message in messages %}
-                  <span style="color: red">{{ message }}</span>
-                {% endfor %}
-              {% endwith %}
-            </p>
           </div>
           <div class="col-sm"></div>
         </div>
@@ -45,7 +38,7 @@
              {% if short_link %}
                <h5 class="text-center">Ваша короткая ссылка:
                  <a href="{{ short_link }}">
-                   {{ absolute_short_url }}
+                   {{ short_link }}
                  </a>
                </h5>
              {% endif %}

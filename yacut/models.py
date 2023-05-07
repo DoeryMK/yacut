@@ -61,17 +61,18 @@ class URLMap(db.Model):
         return urlmap.original
 
     @staticmethod
-    def create(original, short):
+    def create(original, short, **kwargs):
         if original is None:
             raise UrlIsRequired(URL_IS_REQUIRED)
         if short == '' or short is None:
             short = URLMap.get_unique_short()
         else:
-            short = URLMap.short_is_valid(short)
-            if URLMap.short_is_exist(short):
-                raise ShortIsNotUnique(
-                    SHORT_IS_EXIST.format(short=short)
-                )
+            if kwargs.get('form') is None:
+                short = URLMap.short_is_valid(short)
+                if URLMap.short_is_exist(short):
+                    raise ShortIsNotUnique(
+                        SHORT_IS_EXIST.format(short=short)
+                    )
         urlmap = URLMap(
             original=original,
             short=short,
@@ -85,8 +86,8 @@ class URLMap(db.Model):
         if len(short) > MAX_SHORT_LENGTH:
             raise FailedShortValidation
         if re.fullmatch(
-                pattern=SHORT_PATTERN,
-                string=short,
+            pattern=SHORT_PATTERN,
+            string=short,
         ) is None:
             raise FailedShortValidation(
                 INVALID_SHORT
