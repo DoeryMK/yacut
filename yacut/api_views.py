@@ -18,21 +18,28 @@ SHORT_NOT_UNIQUE = 'Имя "{short}" уже занято.'
 def add_short_url():
     """Обработка запроса на создание короткой ссылки."""
     data = request.get_json()
-    if data is None:
-        raise InvalidAPIUsage(NO_REQUEST_BODY)
+    if not data:
+        raise InvalidAPIUsage(
+            NO_REQUEST_BODY
+        )
     if 'url' not in data:
-        raise InvalidAPIUsage(URL_IS_REQUIRED)
+        raise InvalidAPIUsage(
+            URL_IS_REQUIRED
+        )
     short = data.get('custom_id')
     try:
-        urlmap = URLMap.create(
-            original=data['url'],
-            short=short,
-            validation_required=True,
-        )
-        return jsonify(urlmap.to_dict()), 201
+        return jsonify(
+            URLMap.create(
+                original=data['url'],
+                short=short,
+                validation_required=True,
+            ).to_dict()
+        ), 201
     except FailedOriginalValidation:
         raise InvalidAPIUsage(
-            URL_IS_TOO_LONG.format(length=MAX_ORIGINAL_LINK_LENGTH)
+            URL_IS_TOO_LONG.format(
+                length=MAX_ORIGINAL_LINK_LENGTH
+            )
         )
     except FailedShortAutoGeneration:
         raise InvalidAPIUsage(
@@ -44,7 +51,9 @@ def add_short_url():
         )
     except ShortIsNotUnique:
         raise InvalidAPIUsage(
-            SHORT_NOT_UNIQUE.format(short=short)
+            SHORT_NOT_UNIQUE.format(
+                short=short
+            )
         )
 
 
@@ -52,7 +61,9 @@ def add_short_url():
 def get_original_url(short):
     """Обработка запроса на получение оригинальной ссылки."""
     try:
-        return jsonify({'url': URLMap.get_original_url(short)}), 200
+        return jsonify(
+            {'url': URLMap.get_original_url(short)}
+        ), 200
     except ShortIsNotFound:
         raise InvalidAPIUsage(
             SHORT_NOT_FOUND, 404

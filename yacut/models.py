@@ -55,8 +55,8 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_original_url(short):
-        urlmap = URLMap.get_short(short)
-        if urlmap is None:
+        urlmap = URLMap.get_object_via_short(short)
+        if not urlmap:
             raise ShortIsNotFound(
                 SHORT_NOT_FOUND
             )
@@ -64,15 +64,16 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short, validation_required):
-        if len(original) > MAX_ORIGINAL_LINK_LENGTH:
-            raise FailedOriginalValidation(
-                URL_IS_TOO_LONG.format(length=MAX_ORIGINAL_LINK_LENGTH)
-            )
         if short == '' or short is None:
             short = URLMap.get_unique_short()
-        else:
-            if validation_required:
-                short = URLMap.short_is_valid(short)
+        elif validation_required:
+            if len(original) > MAX_ORIGINAL_LINK_LENGTH:
+                raise FailedOriginalValidation(
+                    URL_IS_TOO_LONG.format(
+                        length=MAX_ORIGINAL_LINK_LENGTH
+                    )
+                )
+            short = URLMap.short_is_valid(short)
         urlmap = URLMap(
             original=original,
             short=short,
@@ -87,21 +88,23 @@ class URLMap(db.Model):
             raise FailedShortValidation(
                 SHORT_IS_TOO_LONG
             )
-        if re.fullmatch(
+        if not re.fullmatch(
             pattern=SHORT_PATTERN,
             string=short,
-        ) is None:
+        ):
             raise FailedShortValidation(
                 INVALID_SHORT
             )
-        if URLMap.get_short(short):
+        if URLMap.get_object_via_short(short):
             raise ShortIsNotUnique(
-                SHORT_NOT_UNIQUE.format(short=short)
+                SHORT_NOT_UNIQUE.format(
+                    short=short
+                )
             )
         return short
 
     @staticmethod
-    def get_short(short):
+    def get_object_via_short(short):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
@@ -111,7 +114,7 @@ class URLMap(db.Model):
                 ALLOWED_SIMBOLS,
                 k=AUTO_SHORT_LENGTH
             ))
-            if URLMap.get_short(short) is None:
+            if not URLMap.get_object_via_short(short):
                 return short
         raise FailedShortAutoGeneration(
             FAILED_AUTO_GENERATION
