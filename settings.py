@@ -1,4 +1,5 @@
 import os
+import re
 import string
 
 ALLOWED_SIMBOLS = string.ascii_letters + string.digits
@@ -9,7 +10,7 @@ MAX_ORIGINAL_LINK_LENGTH = 2048
 
 MAX_GET_AUTO_ATTEMPT_NUMBER = 256
 
-SHORT_PATTERN = '[' + ALLOWED_SIMBOLS + ']+$'
+SHORT_PATTERN = '^[' + re.escape(ALLOWED_SIMBOLS) + ']+$'
 
 SHORT_URL_ENDPOINT = 'short_url_view'
 

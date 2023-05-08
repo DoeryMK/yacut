@@ -88,7 +88,7 @@ class URLMap(db.Model):
             raise FailedShortValidation(
                 SHORT_IS_TOO_LONG
             )
-        if not re.fullmatch(
+        if not re.match(
             pattern=SHORT_PATTERN,
             string=short,
         ):
