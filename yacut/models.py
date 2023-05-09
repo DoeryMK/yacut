@@ -54,8 +54,12 @@ class URLMap(db.Model):
         )
 
     @staticmethod
+    def get(short):
+        return URLMap.query.filter_by(short=short).first()
+
+    @staticmethod
     def get_original_url(short):
-        urlmap = URLMap.get_object_via_short(short)
+        urlmap = URLMap.get(short)
         if not urlmap:
             raise ShortIsNotFound(
                 SHORT_NOT_FOUND
@@ -64,15 +68,15 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short, validation_required):
+        if validation_required and len(original) > MAX_ORIGINAL_LINK_LENGTH:
+            raise FailedOriginalValidation(
+                URL_IS_TOO_LONG.format(
+                    length=MAX_ORIGINAL_LINK_LENGTH
+                )
+            )
         if short == '' or short is None:
             short = URLMap.get_unique_short()
         elif validation_required:
-            if len(original) > MAX_ORIGINAL_LINK_LENGTH:
-                raise FailedOriginalValidation(
-                    URL_IS_TOO_LONG.format(
-                        length=MAX_ORIGINAL_LINK_LENGTH
-                    )
-                )
             short = URLMap.short_is_valid(short)
         urlmap = URLMap(
             original=original,
@@ -95,7 +99,7 @@ class URLMap(db.Model):
             raise FailedShortValidation(
                 INVALID_SHORT
             )
-        if URLMap.get_object_via_short(short):
+        if URLMap.get(short):
             raise ShortIsNotUnique(
                 SHORT_NOT_UNIQUE.format(
                     short=short
@@ -104,17 +108,13 @@ class URLMap(db.Model):
         return short
 
     @staticmethod
-    def get_object_via_short(short):
-        return URLMap.query.filter_by(short=short).first()
-
-    @staticmethod
     def get_unique_short():
         for attempt in range(MAX_GET_AUTO_ATTEMPT_NUMBER):
             short = ''.join(random.choices(
                 ALLOWED_SIMBOLS,
                 k=AUTO_SHORT_LENGTH
             ))
-            if not URLMap.get_object_via_short(short):
+            if not URLMap.get(short):
                 return short
         raise FailedShortAutoGeneration(
             FAILED_AUTO_GENERATION
